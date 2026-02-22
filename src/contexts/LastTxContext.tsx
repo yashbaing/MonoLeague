@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-const STORAGE_KEY = 'dream11_txHistory';
+const STORAGE_KEY = 'monoleague_txHistory';
 const EXPLORER = 'https://testnet.monadexplorer.com';
 const MAX_HISTORY = 50;
 
 export type TxEntry = { hash: string; chainId: number; timestamp: number };
 
-const LEGACY_KEY = 'dream11_lastTx';
+const LEGACY_KEY = 'monoleague_lastTx';
 
 function saveStored(txs: TxEntry[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(txs.slice(0, MAX_HISTORY)));

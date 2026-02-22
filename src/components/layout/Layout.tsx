@@ -20,7 +20,7 @@ export function Layout() {
             className="flex shrink-0 items-center gap-2.5 transition opacity-90 hover:opacity-100"
           >
             <span className="text-xl font-bold tracking-tight text-emerald-400">
-              Dream 11
+              MonoLeague
             </span>
             <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-emerald-400/90">
               Testnet

@@ -1,6 +1,6 @@
-# Dream 11 - Fantasy Cricket on Monad Testnet
+# MonoLeague - Fantasy Cricket on Monad Testnet
 
-A full on-chain fantasy sports web app (Dream11-style) built on Monad testnet. Create your fantasy team, join contests, and win prizes.
+A full on-chain fantasy sports web app built on Monad testnet. Create your fantasy team, join contests, and win prizes.
 
 ## Tech Stack
 
