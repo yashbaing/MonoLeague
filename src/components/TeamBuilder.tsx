@@ -28,6 +28,16 @@ function parseTxError(msg: string): string {
 const MONAD_CHAIN_ID = 10143;
 const EXPLORER = 'https://testnet.monadexplorer.com';
 
+function selectionScore(avgFantasy: number, last3Avg: number, poolAvg: number): number {
+  if (poolAvg <= 0) return 50;
+  const combined = last3Avg * 0.6 + avgFantasy * 0.4;
+  const ratio = combined / poolAvg;
+  return Math.min(100, Math.round(50 + (ratio - 1) * 50));
+}
+function predictionLabel(score: number): string {
+  return score >= 70 ? 'Good' : score >= 50 ? 'Average' : 'Risky';
+}
+
 interface TeamBuilderProps {
   match: Match;
   players: Player[];
@@ -235,7 +245,25 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
                   className="flex flex-1 items-center justify-between text-left"
                 >
                   <div>
-                    <p className="font-medium text-white">{p.name}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-white">{p.name}</p>
+                      {match.id === 2 && playerStats?.length && (() => {
+                        const stat = playerStats.find((s) => s.id === p.id);
+                        if (!stat) return null;
+                        const poolAvg = playerStats.reduce((s, x) => s + x.avgFantasy, 0) / playerStats.length;
+                        const score = selectionScore(stat.avgFantasy, stat.last3Avg, poolAvg);
+                        const label = predictionLabel(score);
+                        return (
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              score >= 70 ? 'bg-emerald-500/25 text-emerald-400' : score >= 50 ? 'bg-amber-500/25 text-amber-400' : 'bg-red-500/25 text-red-400'
+                            }`}
+                          >
+                            {label}
+                          </span>
+                        );
+                      })()}
+                    </div>
                     <p className="text-sm text-slate-500">
                       {p.role} · {p.credit} cr
                     </p>

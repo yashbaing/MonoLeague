@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useReadContract, useReadContracts, useWriteContract } from 'wagmi';
 import { contestAbi } from '@/contracts/abis/Contest';
 import { useContest } from '@/hooks/useContest';
+import { useLastTx } from '@/contexts/LastTxContext';
 import { Link } from 'react-router-dom';
 
 const EXPLORER = 'https://testnet.monadexplorer.com';
@@ -88,6 +89,13 @@ export function PrizesClaimSection({
 
   const isCompleted = status === 'Completed';
   const showWinSuccess = isClaimSuccess && claimTxHash && lastClaimed;
+  const { setLastTx } = useLastTx();
+
+  useEffect(() => {
+    if (isClaimSuccess && claimTxHash) {
+      setLastTx(claimTxHash, 10143);
+    }
+  }, [isClaimSuccess, claimTxHash, setLastTx]);
 
   const handleClaim = (entry: { entryIndex: number; rank: number }) => {
     const amount = prizeLabel(entry.rank, firstPrizeAmount);

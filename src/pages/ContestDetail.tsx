@@ -2,10 +2,12 @@ import { useParams, Link } from 'react-router-dom';
 import { Leaderboard } from '@/components/Leaderboard';
 import { ContestCard } from '@/components/ContestCard';
 import { MatchScorecard } from '@/components/MatchScorecard';
+import { MatchPredictions } from '@/components/MatchPredictions';
 import { mockMatches } from '@/data/mockMatches';
 import { useMatches } from '@/hooks/useMatches';
 import { useContestForMatch } from '@/hooks/useContestForMatch';
 import { useScorecard } from '@/hooks/useScorecard';
+import { usePlayerStats } from '@/hooks/usePlayerStats';
 import { resolveContestAddress } from '@/utils/contestAddress';
 import { useState } from 'react';
 
@@ -16,8 +18,10 @@ export function ContestDetail() {
   const match = matches?.find((m) => m.id === mid) ?? mockMatches.find((m) => m.id === mid);
   const { contestAddress: contestForMatchAddress } = useContestForMatch(mid);
   const contestAddress = resolveContestAddress(contestId, contestForMatchAddress);
-  const [view, setView] = useState<'contest' | 'leaderboard' | 'scorecard'>('contest');
+  const [view, setView] = useState<'contest' | 'leaderboard' | 'scorecard' | 'predictions'>('contest');
   const { data: scorecard } = useScorecard(mid);
+  const { data: playerStats, isLoading: playerStatsLoading, isError: playerStatsError } = usePlayerStats(mid);
+  const showPredictions = mid === 2;
 
   if (!match) {
     return (
@@ -42,7 +46,7 @@ export function ContestDetail() {
         <p className="mt-1 text-slate-400">{match.venue}</p>
       </div>
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setView('contest')}
           className={`rounded-lg px-4 py-2 font-medium transition ${
@@ -63,6 +67,18 @@ export function ContestDetail() {
         >
           Leaderboard
         </button>
+        {showPredictions && (
+          <button
+            onClick={() => setView('predictions')}
+            className={`rounded-lg px-4 py-2 font-medium transition ${
+              view === 'predictions'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-slate-800 text-slate-400 hover:text-white'
+            }`}
+          >
+            Predictions
+          </button>
+        )}
         <button
           onClick={() => setView('scorecard')}
           className={`rounded-lg px-4 py-2 font-medium transition ${
@@ -89,6 +105,24 @@ export function ContestDetail() {
           )}
           {view === 'leaderboard' && (
             <Leaderboard matchId={mid} contestAddress={contestAddress} />
+          )}
+          {view === 'predictions' && showPredictions && (
+            playerStatsError ? (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-amber-400">Could not load predictions.</p>
+                <p className="mt-2 text-sm text-slate-500">Start the backend: <code className="rounded bg-slate-800 px-1">npm run backend</code> in the project root (port 3001).</p>
+              </div>
+            ) : playerStats?.length ? (
+              <MatchPredictions
+                playerStats={playerStats}
+                matchTitle={`${match.teamA} vs ${match.teamB}`}
+              />
+            ) : (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-slate-400">{playerStatsLoading ? 'Loading predictions...' : 'No prediction data for this match.'}</p>
+                <p className="mt-2 text-sm text-slate-500">Based on IPL 2025 past performance for MI & CSK players.</p>
+              </div>
+            )
           )}
           {view === 'scorecard' && (
             scorecard?.length ? (

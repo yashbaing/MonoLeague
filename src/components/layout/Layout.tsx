@@ -22,9 +22,6 @@ export function Layout() {
             <span className="text-xl font-bold tracking-tight text-emerald-400">
               MonoLeague
             </span>
-            <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-emerald-400/90">
-              Testnet
-            </span>
           </Link>
 
           <nav className="flex items-center gap-1">

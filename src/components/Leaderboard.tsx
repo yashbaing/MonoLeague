@@ -95,16 +95,19 @@ export function Leaderboard({ contestAddress, matchId }: LeaderboardProps) {
         </div>
       ) : (
         <>
+          <p className="px-6 pt-4 text-xs text-slate-500">
+            Top 6 · Wallet addresses and points from chain (updates dynamically)
+          </p>
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-700 text-left text-sm text-slate-400">
                 <th className="px-6 py-3 font-medium">Rank</th>
-                <th className="px-6 py-3 font-medium">Address</th>
+                <th className="px-6 py-3 font-medium">Wallet</th>
                 <th className="px-6 py-3 font-medium text-right">Points</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
+              {rows.slice(0, 6).map((row, index) => (
                 <tr
                   key={`${row.address}-${row.entryIndex ?? index}`}
                   className={`border-b border-slate-800 transition ${
@@ -128,13 +131,19 @@ export function Leaderboard({ contestAddress, matchId }: LeaderboardProps) {
                       <span className="ml-2 text-xs text-emerald-400">(You)</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right font-medium text-emerald-400">
-                    {row.points} <span className="text-slate-500 font-normal">pts</span>
+                  <td className="px-6 py-4 text-right">
+                    <span className="font-semibold text-emerald-400">{row.points}</span>
+                    <span className="ml-1 text-slate-500">pts</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {rows.length > 6 && (
+            <p className="px-6 py-2 text-xs text-slate-500">
+              +{rows.length - 6} more entries below top 6
+            </p>
+          )}
           <div className="border-t border-slate-700 px-6 py-3">
             <a
               href={`${EXPLORER}/address/${contestAddress}`}

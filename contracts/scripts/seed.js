@@ -77,7 +77,7 @@ async function main() {
   console.log("Match 2 players added.");
 
   const prizePercentagesArr = [50, 30, 20];
-  const firstPrizeAmount = hre.ethers.parseEther("0.01"); // Winner gets 0.01 MON (if prize pool >= 0.01)
+  const firstPrizeAmount = hre.ethers.parseEther("0.1"); // 1st prize: 0.1 MON — send MON to contest address to fund
 
   console.log("Creating contest for match 1...");
   const tx1 = await ContestFactory.createContest(

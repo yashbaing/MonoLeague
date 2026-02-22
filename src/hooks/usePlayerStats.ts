@@ -14,5 +14,6 @@ export function usePlayerStats(matchId: number) {
   return {
     data: query.data ?? null,
     isLoading: query.isLoading,
+    isError: query.isError,
   };
 }

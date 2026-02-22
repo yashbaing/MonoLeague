@@ -55,6 +55,13 @@ export function ContestCard({ matchId, contestAddress }: ContestCardProps) {
                 : '1st: 50%, 2nd: 30%, 3rd: 20%'}
             </span>
           </div>
+          {firstPrizeAmount && Number(firstPrizeAmount) > 0 && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">
+              <p className="font-medium text-amber-400">Fund prizes</p>
+              <p className="mt-1 text-slate-300">Send MON to this address to fund 1st prize (0.1 MON per winner):</p>
+              <p className="mt-1 break-all font-mono text-slate-400">{contestAddress}</p>
+            </div>
+          )}
         </div>
       )}
       <Link
