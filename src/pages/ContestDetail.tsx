@@ -107,16 +107,16 @@ export function ContestDetail() {
             <Leaderboard matchId={mid} contestAddress={contestAddress} />
           )}
           {view === 'predictions' && showPredictions && (
-            playerStatsError ? (
-              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
-                <p className="text-amber-400">Could not load predictions.</p>
-                <p className="mt-2 text-sm text-slate-500">Start the backend: <code className="rounded bg-slate-800 px-1">npm run backend</code> in the project root (port 3001).</p>
-              </div>
-            ) : playerStats?.length ? (
+            playerStats?.length ? (
               <MatchPredictions
                 playerStats={playerStats}
                 matchTitle={`${match.teamA} vs ${match.teamB}`}
               />
+            ) : playerStatsError ? (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-amber-400">Could not load predictions.</p>
+                <p className="mt-2 text-sm text-slate-500">Start the backend: <code className="rounded bg-slate-800 px-1">npm run backend</code> in the project root (port 3001).</p>
+              </div>
             ) : (
               <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
                 <p className="text-slate-400">{playerStatsLoading ? 'Loading predictions...' : 'No prediction data for this match.'}</p>
