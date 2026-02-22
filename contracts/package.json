@@ -1,0 +1,29 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network monadTestnet",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "seed": "hardhat run scripts/seed.js --network monadTestnet",
+    "seed:match2": "hardhat run scripts/seed-match2-only.js --network monadTestnet",
+    "complete-contest": "hardhat run scripts/complete-contest.js --network monadTestnet",
+    "score-and-complete": "hardhat run scripts/score-and-complete.js --network monadTestnet",
+    "lock-score-complete": "hardhat run scripts/lock-score-complete.js --network monadTestnet",
+    "seed:local": "hardhat run scripts/seed.js --network localhost",
+    "test": "hardhat test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  }
+}

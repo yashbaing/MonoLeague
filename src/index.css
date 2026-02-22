@@ -1,0 +1,13 @@
+/* Fallback so content is visible even if Tailwind fails */
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+}
+body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
