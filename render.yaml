@@ -1,0 +1,11 @@
+# Deploy backend to Render: https://dashboard.render.com
+# Connect this repo → New → Blueprint → select this repo. Use Dockerfile at repo root.
+services:
+  - type: web
+    name: monoleague-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: 3001

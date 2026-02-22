@@ -1,0 +1,13 @@
+# Backend only - for Render/Railway/Fly. Build from repo root: docker build -f Dockerfile.backend .
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY backend/package.json backend/package-lock.json* ./
+RUN npm ci --omit=dev
+
+COPY backend/server.js ./
+
+EXPOSE 3001
+ENV PORT=3001
+CMD ["node", "server.js"]
