@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { Player } from '@/data/mockPlayers';
 import { PlayerAvatar } from '@/components/PlayerAvatar';
 import { getPlayerImageUrl } from '@/data/playerImages';
@@ -41,24 +42,70 @@ const ROLE_LABELS: Record<Player['role'], string> = {
 export function TeamArena({ players, captainId, viceCaptainId, onRemove }: TeamArenaProps) {
   if (players.length === 0) return null;
 
-  const byRole: Record<Player['role'], Player[]> = {
-    WK: players.filter((p) => p.role === 'WK'),
-    BAT: players.filter((p) => p.role === 'BAT'),
-    AR: players.filter((p) => p.role === 'AR'),
-    BOWL: players.filter((p) => p.role === 'BOWL'),
+  const [slotAssignments, setSlotAssignments] = useState<(number | null)[]>(() =>
+    POSITION_SLOTS.map(() => null)
+  );
+
+  // Reset assignments whenever players change
+  useEffect(() => {
+    const byRole: Record<Player['role'], Player[]> = {
+      WK: players.filter((p) => p.role === 'WK'),
+      BAT: players.filter((p) => p.role === 'BAT'),
+      AR: players.filter((p) => p.role === 'AR'),
+      BOWL: players.filter((p) => p.role === 'BOWL'),
+    };
+    const roleIdx: Record<Player['role'], number> = { WK: 0, BAT: 0, AR: 0, BOWL: 0 };
+    const next: (number | null)[] = POSITION_SLOTS.map(() => null);
+    POSITION_SLOTS.forEach((slot, idx) => {
+      const list = byRole[slot.role];
+      const i = roleIdx[slot.role];
+      if (list[i]) {
+        next[idx] = list[i].id;
+        roleIdx[slot.role]++;
+      }
+    });
+    setSlotAssignments(next);
+  }, [players]);
+
+  const playersById = new Map(players.map((p) => [p.id, p]));
+
+  const handleSwapSlots = (fromIdx: number, toIdx: number) => {
+    if (
+      fromIdx === toIdx ||
+      fromIdx < 0 ||
+      toIdx < 0 ||
+      fromIdx >= POSITION_SLOTS.length ||
+      toIdx >= POSITION_SLOTS.length
+    ) {
+      return;
+    }
+    // Only allow swapping within same role so the field layout stays sensible
+    if (POSITION_SLOTS[fromIdx].role !== POSITION_SLOTS[toIdx].role) return;
+    setSlotAssignments((prev) => {
+      const copy = [...prev];
+      const tmp = copy[fromIdx];
+      copy[fromIdx] = copy[toIdx];
+      copy[toIdx] = tmp;
+      return copy;
+    });
   };
 
-  const roleIdx: Record<Player['role'], number> = { WK: 0, BAT: 0, AR: 0, BOWL: 0 };
-  const assigned: { player: Player; x: number; y: number; label: string }[] = [];
+  const handleDragStart = (slotIndex: number, ev: React.DragEvent<HTMLDivElement>) => {
+    ev.dataTransfer.setData('text/plain', String(slotIndex));
+    ev.dataTransfer.effectAllowed = 'move';
+  };
 
-  for (const slot of POSITION_SLOTS) {
-    const list = byRole[slot.role];
-    const idx = roleIdx[slot.role];
-    if (list[idx]) {
-      assigned.push({ player: list[idx], x: slot.x, y: slot.y, label: slot.label });
-      roleIdx[slot.role]++;
-    }
-  }
+  const handleDrop = (slotIndex: number, ev: React.DragEvent<HTMLDivElement>) => {
+    ev.preventDefault();
+    const from = Number(ev.dataTransfer.getData('text/plain'));
+    if (Number.isNaN(from)) return;
+    handleSwapSlots(from, slotIndex);
+  };
+
+  const handleDragOver = (ev: React.DragEvent<HTMLDivElement>) => {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+  };
 
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
@@ -72,32 +119,54 @@ export function TeamArena({ players, captainId, viceCaptainId, onRemove }: TeamA
           style={{ transform: 'translate(-50%, -50%)' }}
         />
 
-        {/* Player positions */}
-        {assigned.map(({ player, x, y, label }) => {
-          const isCaptain = captainId === player.id;
-          const isVC = viceCaptainId === player.id;
+        {/* Player positions (draggable between same-role slots) */}
+        {POSITION_SLOTS.map((slot, idx) => {
+          const playerId = slotAssignments[idx];
+          const player = playerId != null ? playersById.get(playerId) ?? null : null;
+          const isCaptain = player && captainId === player.id;
+          const isVC = player && viceCaptainId === player.id;
+          const isInteractive = !!player && !!playersById.size;
           return (
             <div
-              key={player.id}
-              className={`absolute flex flex-col items-center justify-center rounded-full border-2 p-1 transition hover:scale-110 overflow-hidden ${
-                ROLE_COLORS[player.role]
-              } ${onRemove ? 'cursor-pointer' : ''}`}
+              key={idx}
+              className="absolute flex -translate-x-1/2 -translate-y-1/2 transform items-center justify-center"
               style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                transform: 'translate(-50%, -50%)',
+                left: `${slot.x}%`,
+                top: `${slot.y}%`,
                 width: '56px',
                 height: '56px',
               }}
-              title={`${player.name} (${ROLE_LABELS[player.role]})`}
-              onClick={() => onRemove?.(player)}
+              onDragOver={handleDragOver}
+              onDrop={(ev) => handleDrop(idx, ev)}
             >
-              <PlayerAvatar name={player.name} size="sm" imageUrl={getPlayerImageUrl(player.name)} playerId={player.id} className="mb-0.5" />
-              <span className="text-[10px] text-white/90 font-medium">{label}</span>
-              {(isCaptain || isVC) && (
-                <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-black">
-                  {isCaptain ? 'C' : 'VC'}
-                </span>
+              {player ? (
+                <div
+                  draggable={isInteractive}
+                  onDragStart={(ev) => handleDragStart(idx, ev)}
+                  title={`${player.name} (${ROLE_LABELS[player.role]}) — drag to swap position`}
+                  onClick={() => onRemove?.(player)}
+                  className={`relative flex h-full w-full flex-col items-center justify-center rounded-full border-2 p-1 transition hover:scale-110 overflow-hidden ${
+                    ROLE_COLORS[player.role]
+                  } ${onRemove ? 'cursor-pointer' : ''}`}
+                >
+                  <PlayerAvatar
+                    name={player.name}
+                    size="sm"
+                    imageUrl={getPlayerImageUrl(player.name)}
+                    playerId={player.id}
+                    className="mb-0.5"
+                  />
+                  <span className="text-[10px] text-white/90 font-medium">{slot.label}</span>
+                  {(isCaptain || isVC) && (
+                    <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-black">
+                      {isCaptain ? 'C' : 'VC'}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed border-slate-600/60 bg-slate-900/40 text-[10px] font-medium text-slate-500">
+                  {slot.label}
+                </div>
               )}
             </div>
           );
