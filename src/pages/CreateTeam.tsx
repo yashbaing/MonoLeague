@@ -10,11 +10,13 @@ import { useContestForMatch } from '@/hooks/useContestForMatch';
 export function CreateTeam() {
   const { matchId } = useParams<{ matchId: string }>();
   const mid = Number(matchId);
+  const isLiveIccMatch = mid > 1_000_000;
   const { data: matches } = useMatches();
   const match = matches?.find((m) => m.id === mid) ?? mockMatches.find((m) => m.id === mid);
   const { contestAddress, isLoading: isLoadingContest } = useContestForMatch(mid);
   const { data: playersFromApi } = usePlayersFromApi(mid);
-  const players = usePlayers(mid, playersFromApi ?? mockPlayers[mid] ?? mockPlayers[1]);
+  const fallbackPlayers = isLiveIccMatch ? [] : playersFromApi ?? mockPlayers[mid] ?? mockPlayers[1];
+  const players = usePlayers(mid, fallbackPlayers);
 
   if (!match) {
     return (
@@ -23,6 +25,23 @@ export function CreateTeam() {
         <Link to="/" className="mt-4 text-emerald-400 hover:underline">
           Back to matches
         </Link>
+      </div>
+    );
+  }
+
+  if (isLiveIccMatch && players.length === 0) {
+    return (
+      <div>
+        <Link to="/" className="text-sm text-slate-400 hover:text-emerald-400">
+          &larr; Back to matches
+        </Link>
+        <h1 className="mt-4 text-2xl font-bold text-white">
+          {match.teamA} vs {match.teamB}
+        </h1>
+        <p className="mt-1 text-slate-400">{match.venue}</p>
+        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4 text-slate-300">
+          Squads/players for live ICC matches aren’t available yet in this app. Create-team is enabled only for seeded matches.
+        </div>
       </div>
     );
   }

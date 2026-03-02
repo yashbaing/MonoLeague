@@ -1,4 +1,6 @@
 import type { Player } from '@/data/mockPlayers';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { getPlayerImageUrl } from '@/data/playerImages';
 
 interface TeamArenaProps {
   players: Player[];
@@ -77,23 +79,21 @@ export function TeamArena({ players, captainId, viceCaptainId, onRemove }: TeamA
           return (
             <div
               key={player.id}
-              className={`absolute flex flex-col items-center justify-center rounded-full border-2 p-1.5 transition hover:scale-110 ${
+              className={`absolute flex flex-col items-center justify-center rounded-full border-2 p-1 transition hover:scale-110 overflow-hidden ${
                 ROLE_COLORS[player.role]
               } ${onRemove ? 'cursor-pointer' : ''}`}
               style={{
                 left: `${x}%`,
                 top: `${y}%`,
                 transform: 'translate(-50%, -50%)',
-                minWidth: '56px',
-                minHeight: '56px',
+                width: '56px',
+                height: '56px',
               }}
               title={`${player.name} (${ROLE_LABELS[player.role]})`}
               onClick={() => onRemove?.(player)}
             >
-              <span className="truncate max-w-[52px] text-center text-xs font-bold text-white">
-                {player.name.split(' ').pop()}
-              </span>
-              <span className="text-[10px] text-white/90">{label}</span>
+              <PlayerAvatar name={player.name} size="sm" imageUrl={getPlayerImageUrl(player.name)} playerId={player.id} className="mb-0.5" />
+              <span className="text-[10px] text-white/90 font-medium">{label}</span>
               {(isCaptain || isVC) && (
                 <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-black">
                   {isCaptain ? 'C' : 'VC'}

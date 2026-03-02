@@ -10,6 +10,8 @@ import { useScorecard } from '@/hooks/useScorecard';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 import { TeamArena } from '@/components/TeamArena';
 import { PlayerPredictionModal } from '@/components/PlayerPredictionModal';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { getPlayerImageUrl } from '@/data/playerImages';
 import { UserVsComputer } from '@/components/UserVsComputer';
 import { TeamScoreBreakdown } from '@/components/TeamScoreBreakdown';
 import { COMPUTER_TEAM_MATCH2 } from '@/data/computerTeam';
@@ -163,6 +165,7 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
                 key={p.id}
                 className="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-2"
               >
+                <PlayerAvatar name={p.name} size="sm" imageUrl={getPlayerImageUrl(p.name)} playerId={p.id} />
                 <span className="text-white">{p.name}</span>
                 <span className="text-xs text-slate-500">({p.credit})</span>
                 <div className="flex gap-1">
@@ -244,10 +247,12 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
                   disabled={disabled}
                   className="flex flex-1 items-center justify-between text-left"
                 >
-                  <div>
+                  <div className="flex items-center gap-3">
+                    <PlayerAvatar name={p.name} size="md" imageUrl={getPlayerImageUrl(p.name)} playerId={p.id} />
+                    <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-white">{p.name}</p>
-                      {match.id === 2 && playerStats?.length && (() => {
+                      {playerStats?.length && (() => {
                         const stat = playerStats.find((s) => s.id === p.id);
                         if (!stat) return null;
                         const poolAvg = playerStats.reduce((s, x) => s + x.avgFantasy, 0) / playerStats.length;
@@ -267,6 +272,7 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
                     <p className="text-sm text-slate-500">
                       {p.role} · {p.credit} cr
                     </p>
+                    </div>
                   </div>
                   {isSelected && (
                     <span className="rounded bg-emerald-500/20 px-2 py-1 text-xs text-emerald-400">
@@ -274,7 +280,7 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
                     </span>
                   )}
                 </button>
-                {match.id === 2 && playerStats?.length && (
+                {playerStats?.length && (
                   <button
                     type="button"
                     onClick={(e) => {
@@ -304,7 +310,7 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
       </div>
 
       {/* You vs Computer + both score breakdowns — only after tx success (match 2) */}
-      {match.id === 2 && scorecard?.length && isSuccess && (
+      {scorecard?.length && isSuccess && (
         <>
           <UserVsComputer
             scorecard={scorecard}
@@ -389,7 +395,7 @@ export function TeamBuilder({ match, players, contestAddress, isLoadingContest: 
         )}
         {noContestOnTestnet && (
           <p className="mb-4 rounded-lg bg-amber-500/20 p-3 text-sm text-amber-400">
-            No contest on testnet for this match. Run deploy & seed to create contests.
+            No contest on testnet for this match. Run <code className="rounded bg-slate-800 px-1">npm run deploy:seed</code> or <code className="rounded bg-slate-800 px-1">cd contracts && npm run seed</code>.
           </p>
         )}
         <p className="mb-4 text-sm text-slate-400">

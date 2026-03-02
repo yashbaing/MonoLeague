@@ -7,6 +7,7 @@ export function useMatches() {
     queryKey: ['matches'],
     queryFn: fetchMatches,
     staleTime: 60_000,
+    refetchInterval: 60_000,
     retry: 1,
     initialData: mockMatches,
   });

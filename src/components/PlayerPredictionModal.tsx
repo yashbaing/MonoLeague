@@ -1,4 +1,6 @@
 import type { PlayerPastStats } from '@/api/client';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { getPlayerImageUrl } from '@/data/playerImages';
 
 /** Selection score 0–100 from past performance (avg + recent form). */
 function selectionScore(stats: PlayerPastStats, poolAvg: number): number {
@@ -62,11 +64,14 @@ export function PlayerPredictionModal({
           </p>
         </div>
         <div className="p-6">
-          <div className="mb-4">
-            <p className="text-xl font-medium text-white">{player.name}</p>
-            <p className="text-sm text-slate-500">
-              {player.role} · {player.credit} cr
-            </p>
+          <div className="mb-4 flex items-center gap-4">
+            <PlayerAvatar name={player.name} size="lg" imageUrl={getPlayerImageUrl(player.name)} playerId={player.id} />
+            <div>
+              <p className="text-xl font-medium text-white">{player.name}</p>
+              <p className="text-sm text-slate-500">
+                {player.role} · {player.credit} cr
+              </p>
+            </div>
           </div>
           {stats ? (
             <>

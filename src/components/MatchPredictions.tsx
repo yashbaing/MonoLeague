@@ -1,4 +1,6 @@
 import type { PlayerPastStats } from '@/api/client';
+import { PlayerAvatar } from '@/components/PlayerAvatar';
+import { getPlayerImageUrl } from '@/data/playerImages';
 
 function selectionScore(stats: PlayerPastStats, poolAvg: number): number {
   const formWeight = 0.6;
@@ -51,9 +53,12 @@ export function MatchPredictions({ playerStats, matchTitle }: MatchPredictionsPr
                   className="rounded-lg border border-slate-700 bg-slate-800/50 p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <p className="font-medium text-white">{stats.name}</p>
-                      <p className="text-xs text-slate-500">{stats.role}</p>
+                    <div className="flex items-center gap-3">
+                      <PlayerAvatar name={stats.name} size="md" imageUrl={getPlayerImageUrl(stats.name)} playerId={stats.id} />
+                      <div>
+                        <p className="font-medium text-white">{stats.name}</p>
+                        <p className="text-xs text-slate-500">{stats.role}</p>
+                      </div>
                     </div>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${

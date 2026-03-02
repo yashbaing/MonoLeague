@@ -9,6 +9,7 @@ export function usePlayersFromApi(matchId: number) {
     queryFn: () => fetchPlayers(matchId),
     staleTime: 60_000,
     retry: 1,
-    initialData: (mockPlayers[matchId] ?? mockPlayers[1]) as Player[],
+    // Live ICC matches (id > 1,000,000) don't have seeded squads in our app.
+    initialData: (matchId > 1_000_000 ? [] : (mockPlayers[matchId] ?? mockPlayers[1])) as Player[],
   });
 }

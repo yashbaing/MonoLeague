@@ -21,7 +21,7 @@ export function ContestDetail() {
   const [view, setView] = useState<'contest' | 'leaderboard' | 'scorecard' | 'predictions'>('contest');
   const { data: scorecard } = useScorecard(mid);
   const { data: playerStats, isLoading: playerStatsLoading, isError: playerStatsError } = usePlayerStats(mid);
-  const showPredictions = mid === 2;
+  const showPredictions = true;
 
   if (!match) {
     return (
@@ -95,7 +95,7 @@ export function ContestDetail() {
         <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
           <p className="text-slate-400">No contest on testnet for this match.</p>
           <p className="mt-2 text-sm text-slate-500">
-            Run <code className="rounded bg-slate-800 px-1">npm run deploy:seed</code> and add contract addresses.
+            Run <code className="rounded bg-slate-800 px-1">npm run deploy:seed</code> (or <code className="rounded bg-slate-800 px-1">cd contracts && npm run seed</code> if already deployed).
           </p>
         </div>
       ) : (
