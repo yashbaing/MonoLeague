@@ -14,11 +14,14 @@ import { useState } from 'react';
 export function ContestDetail() {
   const { matchId, contestId } = useParams<{ matchId: string; contestId: string }>();
   const mid = Number(matchId);
+  const isDynamicIccMatch = mid > 1_000_000;
   const { data: matches } = useMatches();
   const match = matches?.find((m) => m.id === mid) ?? mockMatches.find((m) => m.id === mid);
   const { contestAddress: contestForMatchAddress } = useContestForMatch(mid);
   const contestAddress = resolveContestAddress(contestId, contestForMatchAddress);
-  const [view, setView] = useState<'contest' | 'leaderboard' | 'scorecard' | 'predictions'>('contest');
+  const [view, setView] = useState<'contest' | 'leaderboard' | 'scorecard' | 'predictions'>(
+    isDynamicIccMatch ? 'predictions' : 'contest'
+  );
   const { data: scorecard } = useScorecard(mid);
   const { data: playerStats, isLoading: playerStatsLoading, isError: playerStatsError } = usePlayerStats(mid);
   const showPredictions = true;
@@ -44,29 +47,36 @@ export function ContestDetail() {
           {match.teamA} vs {match.teamB}
         </h1>
         <p className="mt-1 text-slate-400">{match.venue}</p>
+        <p className="mt-1 text-xs text-slate-500">
+          {new Date(match.startTime).toLocaleString()}
+        </p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setView('contest')}
-          className={`rounded-lg px-4 py-2 font-medium transition ${
-            view === 'contest'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-slate-800 text-slate-400 hover:text-white'
-          }`}
-        >
-          Contest
-        </button>
-        <button
-          onClick={() => setView('leaderboard')}
-          className={`rounded-lg px-4 py-2 font-medium transition ${
-            view === 'leaderboard'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-slate-800 text-slate-400 hover:text-white'
-          }`}
-        >
-          Leaderboard
-        </button>
+        {!isDynamicIccMatch && (
+          <>
+            <button
+              onClick={() => setView('contest')}
+              className={`rounded-lg px-4 py-2 font-medium transition ${
+                view === 'contest'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              Contest
+            </button>
+            <button
+              onClick={() => setView('leaderboard')}
+              className={`rounded-lg px-4 py-2 font-medium transition ${
+                view === 'leaderboard'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              Leaderboard
+            </button>
+          </>
+        )}
         {showPredictions && (
           <button
             onClick={() => setView('predictions')}
@@ -91,21 +101,8 @@ export function ContestDetail() {
         </button>
       </div>
 
-      {!contestAddress ? (
-        <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
-          <p className="text-slate-400">No contest on testnet for this match.</p>
-          <p className="mt-2 text-sm text-slate-500">
-            Run <code className="rounded bg-slate-800 px-1">npm run deploy:seed</code> (or <code className="rounded bg-slate-800 px-1">cd contracts && npm run seed</code> if already deployed).
-          </p>
-        </div>
-      ) : (
+      {isDynamicIccMatch ? (
         <>
-          {view === 'contest' && (
-            <ContestCard matchId={mid} contestAddress={contestAddress} />
-          )}
-          {view === 'leaderboard' && (
-            <Leaderboard matchId={mid} contestAddress={contestAddress} />
-          )}
           {view === 'predictions' && showPredictions && (
             playerStats?.length ? (
               <MatchPredictions
@@ -131,6 +128,60 @@ export function ContestDetail() {
               <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
                 <p className="text-slate-400">No scorecard for this match yet.</p>
                 <p className="mt-2 text-sm text-slate-500">Scorecard is available for Mumbai Indians vs Chennai Super Kings (match 2).</p>
+              </div>
+            )
+          )}
+        </>
+      ) : !contestAddress ? (
+        <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+          <p className="text-slate-400">No contest on testnet for this match.</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Run <code className="rounded bg-slate-800 px-1">npm run deploy:seed</code> (or{' '}
+            <code className="rounded bg-slate-800 px-1">cd contracts && npm run seed</code> if already deployed).
+          </p>
+        </div>
+      ) : (
+        <>
+          {view === 'contest' && (
+            <ContestCard matchId={mid} contestAddress={contestAddress} />
+          )}
+          {view === 'leaderboard' && (
+            <Leaderboard matchId={mid} contestAddress={contestAddress} />
+          )}
+          {view === 'predictions' && showPredictions && (
+            playerStats?.length ? (
+              <MatchPredictions
+                playerStats={playerStats}
+                matchTitle={`${match.teamA} vs ${match.teamB}`}
+              />
+            ) : playerStatsError ? (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-amber-400">Could not load predictions.</p>
+                <p className="mt-2 text-sm text-slate-500">
+                  Start the backend: <code className="rounded bg-slate-800 px-1">npm run backend</code> in the project
+                  root (port 3001).
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-slate-400">
+                  {playerStatsLoading ? 'Loading predictions...' : 'No prediction data for this match.'}
+                </p>
+                <p className="mt-2 text-sm text-slate-500">
+                  Based on IPL 2025 past performance for MI &amp; CSK players.
+                </p>
+              </div>
+            )
+          )}
+          {view === 'scorecard' && (
+            scorecard?.length ? (
+              <MatchScorecard scorecard={scorecard} matchTitle={`${match.teamA} vs ${match.teamB} — Final`} />
+            ) : (
+              <div className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+                <p className="text-slate-400">No scorecard for this match yet.</p>
+                <p className="mt-2 text-sm text-slate-500">
+                  Scorecard is available for Mumbai Indians vs Chennai Super Kings (match 2).
+                </p>
               </div>
             )
           )}

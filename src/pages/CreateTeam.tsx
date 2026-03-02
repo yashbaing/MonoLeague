@@ -39,6 +39,9 @@ export function CreateTeam() {
           {match.teamA} vs {match.teamB}
         </h1>
         <p className="mt-1 text-slate-400">{match.venue}</p>
+        <p className="mt-1 text-xs text-slate-500">
+          {new Date(match.startTime).toLocaleString()}
+        </p>
         <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4 text-slate-300">
           Squads/players for live ICC matches aren’t available yet in this app. Create-team is enabled only for seeded matches.
         </div>
@@ -56,6 +59,9 @@ export function CreateTeam() {
           {match.teamA} vs {match.teamB}
         </h1>
         <p className="mt-1 text-slate-400">{match.venue}</p>
+        <p className="mt-1 text-xs text-slate-500">
+          {new Date(match.startTime).toLocaleString()}
+        </p>
       </div>
       <TeamBuilder
         match={match}
